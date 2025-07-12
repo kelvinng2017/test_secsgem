@@ -1,1 +1,0 @@
-erack_data=['index', 'lotID', 'lptdesc', 'lpt', 'qty', 'booked', 'box_color', 'area_id']

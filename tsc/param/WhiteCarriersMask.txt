@@ -1,6 +1,0 @@
-{
-    "GY001": {
-        "size": 8, 
-        "type": "Cassette"
-    }
-}

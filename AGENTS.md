@@ -1,15 +1,10 @@
 # AGENTS.md 
 ## 技術介紹
 1. 這個是使用python2.7 和python3.8兼容打造的semi通信
-2. acsbridge_KHCP是代表HOST端口
-3. tsc代表的是equipment端
-4. 目前使用的是SEMI E82通訊
-5. secsgem目錄是acsbridge_KHCP和tsc 所使用用的secsgem套件
-6. 目前e82_callback 只能收到解析後的S6F11(Event Reports Send)成json格式
-    - 但是不知道目前流程運作，希望你可以進行分析
-
-## 想要的的功能
-1. 希望e82_callback可以收到解析後的S5F1 (Alarm Report Send)
+2. tsc代表的是equipment端
+3. 目前使用的是SEMI E82通訊
+4. secsgem目錄是acsbridge_KHCP和tsc 所使用用的secsgem套件
+5.HOST 會發送secsgem格式到secsgem套件，再到tsc/semi/e88_mirle_equipment.py
 
 
 

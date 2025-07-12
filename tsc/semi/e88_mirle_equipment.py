@@ -197,9 +197,9 @@ SV_ResultCode=69 # U2: succ=0, cancel=1, abort=2
 SV_Source=70 # A
 SV_StockerCraneID=623 # A
 SV_StockerUnitID=71 # A
-SV_StockerUnitInfo=72 # StockerUnitID, StockerUnitState
+SV_StockerUnitInfo=80 # StockerUnitID, StockerUnitState
 SV_ShelfUnitInfo=77 # ShelfUnitID, ShelfUnitState
-SV_ShelfUnitState=82 # U2: AVAIL=1, PROHIBIT=2, PICKUP(Manual)=3, RESERVED(Manual)=4, RESERVED(AUTO)=5
+SV_ShelfUnitState=84 # U2: AVAIL=1, PROHIBIT=2, PICKUP(Manual)=3, RESERVED(Manual)=4, RESERVED(AUTO)=5
 SV_ShelfUnitID=78 # ShelfUnitID, ShelfUnitState, CarrierID
 SV_StockerUnitState=79 # U2: unknown=0, empty=1, occupied=2, error=3, manual=4
 SV_TransferCommand=74 # CommandInfo, TransferInfo
@@ -212,9 +212,10 @@ SV_ZoneSize=175 # U2
 SV_ZoneType=176 # U2: shelf=1, port=2, other=3
 SV_ZoneState=635 # U2: UP=1, DOWN=2, other=0
 SV_DeviceID=640
+SV_UnitInfo=72
 
-
-SV_ALTX=651
+SV_ALID=81
+SV_ALTX=82
 SV_ALSV=652
 SV_AlarmsSetDescription=40
 SV_UnitType=653
@@ -1022,6 +1023,7 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
         self.ShelfState=1 # U2: AVAIL=1, PROHIBIT=2, PICKUP(Manual)=3, RESERVED(Manual)=4, RESERVED(AUTO)=5
 
         self.ALTX=''
+        self.ALID=''
         self.ALSV=''
         self.UnitType=''
         self.UnitID=''
@@ -1114,6 +1116,7 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             SV_ZoneSize: secsgem.StatusVariable(SV_ZoneSize, "SV_ZoneSize", "", secsgem.SecsVarU2, True),
             SV_ZoneType: secsgem.StatusVariable(SV_ZoneType, "SV_ZoneType", "", secsgem.SecsVarU2, True),
             SV_DeviceID: secsgem.StatusVariable(SV_DeviceID, "SV_DeviceID", "", secsgem.SecsVarString, True),
+            SV_ALID: secsgem.StatusVariable(SV_ALID, "SV_ALID", "", secsgem.SecsVarString, True),
             SV_ALTX: secsgem.StatusVariable(SV_ALTX, "SV_ALTX", "", secsgem.SecsVarString, True), # Mike: 2021/11/08
             SV_ALSV: secsgem.StatusVariable(SV_ALSV, "SV_ALSV", "", secsgem.SecsVarString, True), # Mike: 2021/11/08
             SV_AlarmsSetDescription: secsgem.StatusVariable(SV_AlarmsSetDescription, "SV_AlarmsSetDescription", "", secsgem.SecsVarList, True),
@@ -1123,6 +1126,7 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             SV_SubCode: secsgem.StatusVariable(SV_SubCode, "SV_SubCode", "", secsgem.SecsVarString, True), #Chi 2022/06/17
             SV_UnitAlarmList: secsgem.StatusVariable(SV_UnitAlarmList, "SV_UnitAlarmList", "", secsgem.SecsVarArray, True),
             SV_UnitAlarmInfo: secsgem.StatusVariable(SV_UnitAlarmInfo, "SV_UnitAlarmInfo", "", secsgem.SecsVarList, True),
+            SV_UnitInfo: secsgem.StatusVariable(SV_UnitInfo, "SV_UnitInfo", "", secsgem.SecsVarList, True),
             
         })
         self.status_variables[GEM_MDLN].value=self.MDLN
@@ -1151,16 +1155,16 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             GEM_CONTROL_STATE_LOCAL: secsgem.CollectionEventReport(GEM_CONTROL_STATE_LOCAL,[GEM_CONTROL_STATE]),#OnLineLocal ModeChange Report
             GEM_CONTROL_STATE_REMOTE: secsgem.CollectionEventReport(GEM_CONTROL_STATE_REMOTE, [GEM_MDLN]), # OnLineRemoteModeChange Report
             # Common Report ID 2 for SC events according to specification
-            2: secsgem.CollectionEventReport(2, [SV_EqpName]),  # Common Report for SC events - 修正為 SV_EqpName
+            # 2: secsgem.CollectionEventReport(2, [SV_EqpName]),  # Common Report for SC events - 修正為 SV_EqpName
                 # OnLineRemoteModeChange
             # SC STATE TRANSITION EVENTS - 修正為使用 SV_EqpName
-            53: secsgem.CollectionEventReport(53, [SV_EqpName]),#SCAutoCompleted Report
-            54: secsgem.CollectionEventReport(54, [SV_EqpName]),#SCAutoInitiated Report
-            55: secsgem.CollectionEventReport(55, [SV_EqpName]),#SCPauseCompleted Report
-            56: secsgem.CollectionEventReport(56, [SV_EqpName]),#SCPaused Report 
-            57: secsgem.CollectionEventReport(57, [SV_EqpName]),#SCPauseInitiated Report
-            #SCPaused+5000: secsgem.CollectionEventReport(SCPaused+5000, []),
-            #SCPauseInitiated+5000: secsgem.CollectionEventReport(SCPauseInitiated+5000, []),
+            SCAutoCompleted: secsgem.CollectionEventReport(SCAutoCompleted, [SV_EqpName]),#SCAutoCompleted Report
+            SCAutoInitiated: secsgem.CollectionEventReport(SCAutoInitiated, [SV_EqpName]),#SCAutoInitiated Report
+            SCPauseCompleted: secsgem.CollectionEventReport(SCPauseCompleted, [SV_EqpName]),#SCPauseCompleted Report
+            SCPaused: secsgem.CollectionEventReport(SCPaused, [SV_EqpName]),#SCPaused Report 
+            SCPauseInitiated: secsgem.CollectionEventReport(SCPauseInitiated, [SV_EqpName]),#SCPauseInitiated Report
+            
+           
             # TRANSFER COMMAND STATE TRANSITION EVENTS
             TransferAbortCompleted+5000: secsgem.CollectionEventReport(TransferAbortCompleted+5000, [SV_CommandID, SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName]),
             TransferAbortFailed+5000: secsgem.CollectionEventReport(TransferAbortFailed+5000, [SV_CommandID, SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName]),
@@ -1173,7 +1177,7 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             TransferPaused+5000: secsgem.CollectionEventReport(TransferPaused+5000, [SV_CommandID, SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName]),
             TransferResumed+5000: secsgem.CollectionEventReport(TransferResumed+5000, [SV_CommandID, SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName]),
             # STOCKER CARRIER STATE TRANSITION EVENTS
-            106: secsgem.CollectionEventReport(106, [SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName]),
+            CarrierInstallCompleted+5000: secsgem.CollectionEventReport(CarrierInstallCompleted+5000, [SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName]),
             CarrierRemoveCompleted+5000: secsgem.CollectionEventReport(CarrierRemoveCompleted+5000, [SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName, SV_HandoffType, SV_PortType]),
             CarrierRemoved+5000: secsgem.CollectionEventReport(CarrierRemoved+5000, [SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName, SV_HandoffType, SV_PortType]),
             CarrierResumed+5000: secsgem.CollectionEventReport(CarrierResumed+5000, [SV_CommandID, SV_CarrierID, SV_CarrierLoc, SV_CarrierZoneName, SV_Dest]),
@@ -1217,15 +1221,15 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
                 self.registered_collection_events[ALID+200000].enabled=True
 
         self.registered_collection_events.update({
-            GEM_EQP_OFFLINE: secsgem.CollectionEventLink(GEM_EQP_OFFLINE, [2]),
-            GEM_CONTROL_STATE_REMOTE: secsgem.CollectionEventLink(GEM_CONTROL_STATE_REMOTE, [2]),
-            GEM_CONTROL_STATE_LOCAL:secsgem.CollectionEventLink(GEM_CONTROL_STATE_LOCAL, [1]),
+            GEM_EQP_OFFLINE: secsgem.CollectionEventLink(GEM_EQP_OFFLINE, []),
+            GEM_CONTROL_STATE_REMOTE: secsgem.CollectionEventLink(GEM_CONTROL_STATE_REMOTE, []),
+            GEM_CONTROL_STATE_LOCAL:secsgem.CollectionEventLink(GEM_CONTROL_STATE_LOCAL, []),
             # SC STATE TRANSITION EVENTS - Use RPTID 2 according to specification
-            SCAutoCompleted: secsgem.CollectionEventLink(SCAutoCompleted, [2]),
-            SCAutoInitiated: secsgem.CollectionEventLink(SCAutoInitiated, [2]),
-            SCPauseCompleted: secsgem.CollectionEventLink(SCPauseCompleted, [2]),
-            SCPaused: secsgem.CollectionEventLink(SCPaused, [2]),
-            SCPauseInitiated: secsgem.CollectionEventLink(SCPauseInitiated, [2]),
+            SCAutoCompleted: secsgem.CollectionEventLink(SCAutoCompleted, []),
+            SCAutoInitiated: secsgem.CollectionEventLink(SCAutoInitiated, []),
+            SCPauseCompleted: secsgem.CollectionEventLink(SCPauseCompleted, []),
+            SCPaused: secsgem.CollectionEventLink(SCPaused, []),
+            SCPauseInitiated: secsgem.CollectionEventLink(SCPauseInitiated, []),
 
             # TRANSFER COMMAND STATE TRANSITION EVENTS
             TransferAbortCompleted: secsgem.CollectionEventLink(TransferAbortCompleted, [TransferAbortCompleted+5000]),
@@ -1240,7 +1244,7 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             TransferResumed: secsgem.CollectionEventLink(TransferResumed, [TransferResumed+5000]),
 
             # STOCKER CARRIER STATE TRANSITION EVENTS
-            CarrierInstallCompleted: secsgem.CollectionEventLink(CarrierInstallCompleted, [106]),
+            CarrierInstallCompleted: secsgem.CollectionEventLink(CarrierInstallCompleted, [CarrierInstallCompleted+5000]),
             CarrierRemoveCompleted: secsgem.CollectionEventLink(CarrierRemoveCompleted, [CarrierRemoveCompleted+5000]),
             CarrierRemoved: secsgem.CollectionEventLink(CarrierRemoved, [CarrierRemoved+5000]),
             CarrierResumed: secsgem.CollectionEventLink(CarrierResumed, [CarrierResumed+5000]),
@@ -1264,9 +1268,9 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             DeviceOffline: secsgem.CollectionEventLink(DeviceOffline, [DeviceOffline+5000]),
         })
 
-        self.registered_collection_events[GEM_EQP_OFFLINE].enabled = True
-        self.registered_collection_events[GEM_CONTROL_STATE_REMOTE].enabled = True
-        self.registered_collection_events[GEM_CONTROL_STATE_LOCAL].enabled = True
+        # self.registered_collection_events[GEM_EQP_OFFLINE].enabled = True
+        # self.registered_collection_events[GEM_CONTROL_STATE_REMOTE].enabled = True
+        # self.registered_collection_events[GEM_CONTROL_STATE_LOCAL].enabled = True
         self.registered_collection_events[SCAutoCompleted].enabled=True
         self.registered_collection_events[SCAutoInitiated].enabled=True
         self.registered_collection_events[SCPauseCompleted].enabled=True
@@ -1402,7 +1406,7 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
             value=self.SCState
             return sv.value_type(value)
         elif sv.svid == SV_EqpName:
-            value=self.EqpName
+            value=self.MDLN
             return sv.value_type(value)
         elif sv.svid == SV_EnhancedCarriers:
             L_EnhancedCarriers=[]
@@ -1586,6 +1590,12 @@ class E88MirleEquipment(secsgem.GemEquipmentHandler):
         elif sv.svid == SV_ALTX: # Mike: 2021/11/08
             value=self.ALTX
             return sv.value_type(value)
+        elif sv.svid == SV_ALID:
+            value=self.ALID
+            return sv.value_type(value)
+        elif sv.svid == SV_UnitInfo:
+            ret=secsgem.SecsVarList([DI.UNITID, DI.UNITSTATE], [self.UnitInfo['UnitID'], self.UnitInfo['UnitState']])
+            return ret
         elif sv.svid == SV_ALSV: # Mike: 2021/11/08
             value=self.ALSV
             return sv.value_type(value)
