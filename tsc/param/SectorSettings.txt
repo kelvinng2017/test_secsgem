@@ -1,0 +1,38 @@
+{
+    "DONE": {
+        "alarmEmptyEnable": false, 
+        "alarmFullEnable": false, 
+        "alarmHighEnable": false, 
+        "alarmLowEnable": false, 
+        "sectorColor": "#f57900", 
+        "sectorName": "DONE", 
+        "waterLevelHigh": 75, 
+        "waterLevelLow": 25, 
+        "water_level_table": {}
+    }, 
+    "NG": {
+        "alarmEmptyEnable": false, 
+        "alarmFullEnable": true, 
+        "alarmHighEnable": true, 
+        "alarmLowEnable": false, 
+        "sectorColor": "#f7b84b", 
+        "sectorName": "NG", 
+        "waterLevelHigh": 75, 
+        "waterLevelLow": 25, 
+        "water_level_table": {
+            "full": "<class 'alarms.ErackLevelFullWarning'>", 
+            "high": "<class 'alarms.ErackLevelHighWarning'>"
+        }
+    }, 
+    "WAIT": {
+        "alarmEmptyEnable": false, 
+        "alarmFullEnable": false, 
+        "alarmHighEnable": false, 
+        "alarmLowEnable": false, 
+        "sectorColor": "#729fcf", 
+        "sectorName": "WAIT", 
+        "waterLevelHigh": 75, 
+        "waterLevelLow": 25, 
+        "water_level_table": {}
+    }
+}
